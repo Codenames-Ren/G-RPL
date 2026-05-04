@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('applicants', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->string('nama');
+            $table->string('nik')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('alamat')->nullable();
             $table->timestamps();
         });
     }
