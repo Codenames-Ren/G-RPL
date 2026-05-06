@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Applicant;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -15,7 +16,11 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
+
+            'nik' => 'required',
+            'no_hp' => 'required',
+            'alamat' => 'required',
         ]);
 
         $user = User::create([
@@ -25,9 +30,14 @@ class AuthController extends Controller
             'role' => 'applicant',
         ]);
 
+        event(new Registered($user));
+
         Applicant::create([
             'user_id' => $user->id,
             'nama' => $request->name,
+            'nik' => $request->nik,
+            'no_hp'=> $request->no_hp,
+            'alamat' => $request->alamat,
         ]);
 
         return response()->json([
@@ -45,10 +55,25 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        // cek user ada atau tidak
+        if (!$user) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
+        }
+
+        // cek password
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        // cek email verification
+        if ($user->role === 'applicant' && !$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email not verified'
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
