@@ -21,7 +21,7 @@
             <label class="block text-xs font-bold text-[#1A1A2E] mb-1.5">
                 Nomor Induk Kependudukan (NIK)
             </label>
-            <input type="text" name="nik" value="{{ old('nik') }}" placeholder="Masukkan 16 digit NIK" maxlength="16"
+            <input type="text" name="nik" value="{{ old('nik') }}" placeholder="Contoh: 3171234567890001" maxlength="16"
                    class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-[#1A1A2E] focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0] outline-none transition-all mb-4 @error('nik') border-[#D32F2F] @enderror">
             @error('nik') <p class="text-xs text-[#D32F2F] -mt-3 mb-3">{{ $message }}</p> @enderror
 
@@ -29,7 +29,7 @@
             <label class="block text-xs font-bold text-[#1A1A2E] mb-1.5">
                 Nama Lengkap (Sesuai KTP/Ijazah)
             </label>
-            <input type="text" name="name" value="{{ old('name') }}" placeholder="Masukkan Nama Lengkap"
+            <input type="text" name="name" value="{{ old('name') }}" placeholder="Contoh: Budi Santoso"
                    class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-[#1A1A2E] focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0] outline-none transition-all mb-4 @error('name') border-[#D32F2F] @enderror">
             @error('name') <p class="text-xs text-[#D32F2F] -mt-3 mb-3">{{ $message }}</p> @enderror
 
@@ -37,7 +37,7 @@
             <label class="block text-xs font-bold text-[#1A1A2E] mb-1.5">
                 Alamat Email Aktif
             </label>
-            <input type="email" name="email" value="{{ old('email') }}" placeholder="contoh@email.com"
+            <input type="email" name="email" value="{{ old('email') }}" placeholder="nama@institusi.com"
                    class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-[#1A1A2E] focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0] outline-none transition-all mb-4 @error('email') border-[#D32F2F] @enderror">
             @error('email') <p class="text-xs text-[#D32F2F] -mt-3 mb-3">{{ $message }}</p> @enderror
 
@@ -45,13 +45,13 @@
                 {{-- Password --}}
                 <div>
                     <label class="block text-xs font-bold text-[#1A1A2E] mb-1.5">Kata Sandi</label>
-                    <input type="password" name="password" placeholder="Min. 8 karakter"
+                    <input type="password" name="password" placeholder="Minimal 8 karakter"
                            class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-[#1A1A2E] focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0] outline-none transition-all mb-4 @error('password') border-[#D32F2F] @enderror">
                 </div>
                 {{-- Confirm Password --}}
                 <div>
                     <label class="block text-xs font-bold text-[#1A1A2E] mb-1.5">Konfirmasi Sandi</label>
-                    <input type="password" name="password_confirmation" placeholder="Ulangi Sandi"
+                    <input type="password" name="password_confirmation" placeholder="Ketik ulang sandi"
                            class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-[#1A1A2E] focus:border-[#1565C0] focus:ring-1 focus:ring-[#1565C0] outline-none transition-all mb-4">
                 </div>
             </div>
