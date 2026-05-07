@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserManagementController;
 
 Route::prefix('auth')->group(function () {
 
@@ -49,3 +50,10 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
     ]);
 
 })->middleware('signed')->name('verification.verify');
+
+Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
+
+    Route::post('/staff', [UserManagementController::class, 'createUser']);
+    Route::get('/staff', [UserManagementController::class, 'getUsers']);
+    Route::patch('/staff/{id}/switch-status', [UserManagementController::class, 'toggleUserStatus']);
+});
