@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('konsentrasis', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('prodi_id')
+                ->constrained('prodis')
+                ->cascadeOnDelete();
+            
+            $table->string('nama_konsentrasi');
             $table->timestamps();
         });
     }
