@@ -76,6 +76,12 @@ class AuthController extends Controller
             ], 403);
         }
 
+        if(!$user->is_active) {
+            return response()->json([
+                'message' => "Account is inactive"
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
