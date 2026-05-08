@@ -43,4 +43,4 @@ Route::get('/asesor/riwayat', function () {
 })->name('assessor.history');
 
 // 4. Route Auth (Login/Register bawaan Laravel)
-require __DIR__.'/auth.php';
+require __DIR__.'/api.php';
