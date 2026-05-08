@@ -97,7 +97,7 @@
                             <p class="text-xs text-[#5A6478]">Data profil dan alamat lengkap telah disimpan.</p>
                         </div>
                     </div>
-                    <a href="#" class="px-4 py-2 border border-gray-300 text-[#5A6478] text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors">Edit Profil</a>
+                    <a href="{{ route('applicant.profile') }}" class="px-4 py-2 border border-gray-300 text-[#5A6478] text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors">Edit Profil</a>
                 </div>
 
                 {{-- Step 2: Pilih Program (Active/To Do State) --}}
@@ -109,7 +109,7 @@
                             <p class="text-xs text-[#5A6478]">Pilih tipe pendaftaran (A/B) dan tujuan prodi Anda.</p>
                         </div>
                     </div>
-                    <a href="#" class="px-4 py-2 bg-[#1565C0] text-white text-xs font-bold rounded-lg hover:bg-[#0D47A1] transition-colors whitespace-nowrap text-center">Isi Formulir</a>
+                    <a href="{{ route('applicant.program') }}" class="px-4 py-2 bg-[#1565C0] text-white text-xs font-bold rounded-lg hover:bg-[#0D47A1] transition-colors whitespace-nowrap text-center">Isi Formulir</a>
                 </div>
 
                 {{-- Step 3: Upload Dokumen (Locked State) --}}
@@ -121,7 +121,7 @@
                             <p class="text-xs text-gray-400">Upload KTP, Ijazah, CV, dan Sertifikat. <span class="italic">(Selesaikan tahap 2)</span></p>
                         </div>
                     </div>
-                    <button disabled class="px-4 py-2 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed">Mulai Upload</button>
+                    <a href="{{ route('applicant.documents') }}" class="px-4 py-2 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed pointer-events-none">Mulai Upload</a>
                 </div>
 
                 {{-- Step 4: Learning Outcomes (Locked State) --}}
@@ -133,7 +133,7 @@
                             <p class="text-xs text-gray-400">Deskripsikan pengalaman kerja Anda. <span class="italic">(Selesaikan tahap 3)</span></p>
                         </div>
                     </div>
-                    <button disabled class="px-4 py-2 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed">Input Data</button>
+                    <a href="{{ route('applicant.outcomes') }}" class="px-4 py-2 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed pointer-events-none">Input Data</a>
                 </div>
 
             </div>
