@@ -12,7 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('applications', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('applicant_id')
+                ->constrained('applicants')
+                ->cascadeOnDelete();
+            
+            $table->enum('jenis_RPL', ['A','B']);
+
+            $table->foreignUuid('prodi_id')
+                ->constrained('prodis')
+                ->cascadeOnDelete();
+
+            $table->foreignUuid('konsentrasi_id')
+                ->nullable()
+                ->constrained('konsentrasis')
+                ->nullOnDelete();
+            
+            $table->enum('status', [
+                'draft',
+                'submitted',
+                'assigned',
+                'assessed',
+                'approved',
+                'rejected',
+                'cancelled'
+            ])->default('draft');
+
             $table->timestamps();
         });
     }

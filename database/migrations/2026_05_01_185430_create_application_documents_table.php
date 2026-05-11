@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('application_documents', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('application_id')
+                ->constrained('applications')
+                ->cascadeOnDelete();
+               
+            $table->string('type');
+
+            $table->string('file_path');
             $table->timestamps();
         });
     }

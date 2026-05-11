@@ -12,7 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('learning_experiences', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('application_id')
+                ->constrained('applications')
+                ->cascadeOnDelete();
+
+            $table->string('title');
+
+            $table->enum('type', [
+                'course',
+                'experience'
+            ]);
+
+            $table->text('description')->nullable();
+
             $table->timestamps();
         });
     }
