@@ -6,7 +6,11 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserManagementController;
+use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\ApplicationDocumentController;
+use App\Http\Controllers\Api\LearningExperienceController;
 
+//Auth Routes
 Route::prefix('auth')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register'])
@@ -21,6 +25,7 @@ Route::prefix('auth')->group(function () {
 
 });
 
+// Auth Verification Email
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 
     $user = User::find($request->id);
@@ -51,9 +56,52 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 
 })->middleware('signed')->name('verification.verify');
 
+// Auth superadmin role
 Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
 
     Route::post('/staff', [UserManagementController::class, 'createUser']);
     Route::get('/staff', [UserManagementController::class, 'getUsers']);
     Route::patch('/staff/{id}/switch-status', [UserManagementController::class, 'toggleUserStatus']);
+});
+
+// Applicant Routes
+Route::middleware([
+    'auth:sanctum',
+    'role:applicant'
+])->group(function () {
+    
+    //Applications Route
+    Route::post('/applications', [ApplicationController::class, 'createApplication'])
+        ->middleware('throttle:10,1');
+    
+    Route::get('/applications', [ApplicationController::class, 'getMyApplications']);
+    Route::get('/applications/{id}', [ApplicationController::class, 'getApplicationDetail']);
+
+    Route::put('/applications/{id}', [ApplicationController::class, 'updateApplication'])
+        ->middleware('throttle:5,1');
+    
+    Route::patch('/applications/{id}/submit', [ApplicationController::class, 'submitApplication'])
+        ->middleware('throttle:5,1');
+    
+    Route::patch('/applications/{id}/cancel', [ApplicationController::class, 'cancelApplication'])
+        ->middleware('throttle:5,1');
+    
+
+    // Route Documents
+    Route::post('/applications/{applicationId}/documents', [ApplicationDocumentController::class, 'uploadDocument'])
+        ->middleware('throttle:5,1');
+    
+    Route::get('/applications/{applicationId}/documents', [ApplicationDocumentController::class, 'getDocuments']);
+    
+    Route::put('/documents/{id}', [ApplicationDocumentController::class, 'updateDocument'])
+        ->middleware('throttle:5,1');
+    
+    // Learning Experiences
+    Route::post('/applications/{applicationId}/learning-experiences', [LearningExperienceController::class, 'createLearningExperience'])
+        ->middleware('throttle:10,1');
+    
+    Route::get('/applications/{applicationId}/learning-experiences', [LearningExperienceController::class, 'getLearningExperiences']);
+
+    Route::put('/learning-experiences/{id}', [LearningExperienceController::class, 'updateLearningExperience'])
+        ->middleware('throttle:10,1');
 });
