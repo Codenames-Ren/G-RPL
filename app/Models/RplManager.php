@@ -31,4 +31,9 @@ class RplManager extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function assignment()
+    {
+        return $this->hasMany(Assignment::class, 'manager_id');
+    }
 }
