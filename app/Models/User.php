@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -52,5 +53,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function applicant()
     {
         return $this->hasOne(Applicant::class);
+    }
+
+    public function asesor()
+    {
+        return $this->hasOne(Asesor::class);
+    }
+
+    public function rplManager()
+    {
+        return $this->hasOne(RplManager::class);
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 }
