@@ -22,7 +22,8 @@ class UserManagementController extends Controller
             // asesor
             'nidn' => 'required_if:role,asesor',
             'bidang_keahlian' => 'required_if:role,asesor',
-            'prodi_id' => 'required_if:role,asesor',
+            'prodi_ids' => 'required_if:role,asesor|array',
+            'prodi_ids.*' => 'exists:prodis,id',
 
             // manager
             'jabatan' => 'required_if:role,manager',
@@ -39,13 +40,17 @@ class UserManagementController extends Controller
         // create asesor profile
         if ($request->role === 'asesor') {
 
-            Asesor::create([
+            $asesor = Asesor::create([
                 'user_id' => $user->id,
                 'nama' => $request->name,
                 'nidn' => $request->nidn,
                 'bidang_keahlian' => $request->bidang_keahlian,
-                'prodi_id' => $request->prodi_id,
             ]);
+
+            // attach prodi to pivot table
+            $asesor->prodis()->attach(
+                $request->prodi_ids
+            );
         }
 
         // create manager profile
