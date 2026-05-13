@@ -5,8 +5,7 @@
 
 <x-auth-navbar>
     <x-slot name="rightSlot">
-        Belum punya akun?
-        <a href="{{ route('register') }}" class="text-[#1565C0] font-bold hover:underline ml-1">Daftar Sekarang</a>
+        {{-- Dikosongkan, tidak menampilkan teks apapun di header --}}
     </x-slot>
 </x-auth-navbar>
 
