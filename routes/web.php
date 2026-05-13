@@ -83,5 +83,5 @@ Route::get('/manager/laporan', function () {
 })->name('manager.reports');
 
 // 5. Route Auth (Login/Register bawaan Laravel) & API
-require __DIR__.'/auth.php';
+
 require __DIR__.'/api.php';
