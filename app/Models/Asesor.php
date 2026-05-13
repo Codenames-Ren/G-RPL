@@ -34,8 +34,13 @@ class Asesor extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function prodi()
+    public function prodis()
     {
-        return $this->belongsTo(Prodi::class);
+        return $this->belongsToMany(Prodi::class, 'asesor_prodis');
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
     }
 }
