@@ -39,4 +39,9 @@ class Prodi extends Model
     {
         return $this->hasMany(Application::class);
     }
+
+    public function asesors()
+    {
+        return $this->belongsToMany(Asesor::class,'asesor_prodis');
+    }
 }
