@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApplicationDocumentController;
 use App\Http\Controllers\Api\LearningExperienceController;
+use App\Http\Controllers\Api\AssignmentController;
 
 //Auth Routes
 Route::prefix('auth')->group(function () {
@@ -104,4 +105,36 @@ Route::middleware([
 
     Route::put('/learning-experiences/{id}', [LearningExperienceController::class, 'updateLearningExperience'])
         ->middleware('throttle:10,1');
+});
+
+// Manager Routes
+Route::middleware([
+    'auth:sanctum',
+    'role:manager'
+])->group(function () {
+    
+    // get submitted application
+    Route::get('/manager/applications', [
+        AssignmentController::class, 'getSubmittedApplications'
+    ]);
+
+    //get application detail
+    Route::get('/manager/applications/{id}', [
+        AssignmentController::class, 'getApplicationDetail'
+    ]);
+
+    // Get asesors by application
+    Route::get('/manager/applications/{applicationId}/asesors', [
+        AssignmentController::class, 'getAsesors'
+    ]);
+
+    // Assign asesor
+    Route::post('/manager/applications/{applicationId}/assign', [
+        AssignmentController::class, 'assignAsesor'
+    ])->middleware('throttle:5,1');
+
+    //get assignment history
+    Route::get('/manager/applications/{applicationId}/assignments', [
+        AssignmentController::class, 'getAssignmentHistory'
+    ]);
 });
