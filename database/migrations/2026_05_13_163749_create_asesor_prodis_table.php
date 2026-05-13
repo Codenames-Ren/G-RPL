@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('asesors', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')
-                ->constrained('users')
+        Schema::create('asesor_prodis', function (Blueprint $table) {
+
+            $table->foreignUuid('asesor_id')
+                ->constrained('asesors')
                 ->cascadeOnDelete();
 
-            $table->string('nama');
-            $table->string('nidn');
-            $table->string('bidang_keahlian');
-                
+            $table->foreignUuid('prodi_id')
+                ->constrained('prodis')
+                ->cascadeOnDelete();
+
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('asesors');
+        Schema::dropIfExists('asesor_prodis');
     }
 };
