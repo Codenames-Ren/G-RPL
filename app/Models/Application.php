@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Assignment;
 
 class Application extends Model
 {
@@ -52,5 +53,15 @@ class Application extends Model
     public function learningExperiences()
     {
         return $this->hasMany(LearningExperience::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    public function latestAssignment()
+    {
+        return $this->hasOne(Assignment::class)->latestOfMany();
     }
 }
