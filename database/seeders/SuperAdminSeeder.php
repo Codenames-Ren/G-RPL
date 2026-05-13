@@ -15,7 +15,7 @@ class SuperAdminSeeder extends Seeder
             'id' => (string) Str::uuid(),
             'name' => 'Gilbert',
             'email' => 'gilbert@grpl.com',
-            'password' => Hash::make('Seadragon555'),
+            'password' => Hash::make('123456'),
             'role' => 'superadmin',
             'is_active' => true,
             'email_verified_at' => now(),
