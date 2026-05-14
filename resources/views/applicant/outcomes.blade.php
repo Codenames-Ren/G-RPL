@@ -3,129 +3,104 @@
 @section('title', 'Input Capaian Pembelajaran')
 @section('applicant_content')
 
+<div id="outcomeAlert" class="hidden mb-6 p-4 rounded-xl text-sm font-bold"></div>
 <div class="mb-8">
-    <h1 class="font-heading text-2xl font-bold text-[#1A1A2E]">Input Capaian Pembelajaran</h1>
-    <p class="text-sm text-[#5A6478] mt-1">Tambahkan learning experiences lalu submit application.</p>
+    <h1 class="font-heading text-2xl font-bold text-[#1A1A2E]">Learning Outcomes</h1>
+    <p class="text-sm text-[#5A6478] mt-1">Tambah learning experience dan submit lewat endpoint API.</p>
 </div>
 
-@if(session('success'))
-    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-sm font-bold text-green-700">{{ session('success') }}</div>
-@endif
-
-@if($errors->any())
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm font-bold text-red-700">{{ $errors->first() }}</div>
-@endif
-
-@if(!$application)
-    <div class="bg-white border border-[#1565C0]/15 rounded-xl p-8 text-center">
-        <h2 class="font-heading font-bold text-[#1A1A2E]">Belum ada application</h2>
-        <p class="text-sm text-[#5A6478] mt-2">Buat application di tahap pilih program dulu.</p>
-        <a href="{{ route('applicant.program') }}" class="inline-flex mt-5 px-5 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg">Pilih Program</a>
-    </div>
-@else
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
-                <h3 class="text-xs font-bold text-[#1565C0] mb-2">Petunjuk Pengisian</h3>
-                <p class="text-xs text-[#5A6478] leading-relaxed">API menerima `title`, `type` (`course` atau `experience`), dan `description`. Minimal satu learning experience diperlukan sebelum submit.</p>
-            </div>
-
-            @if(in_array($application->status, ['draft', 'rejected'], true))
-                <form method="POST" action="{{ route('applicant.experiences.store', $application) }}" class="bg-white border border-[#1565C0]/15 rounded-xl shadow-sm overflow-hidden">
-                    @csrf
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="font-heading font-bold text-[#1A1A2E]">Tambah Learning Experience</h2>
-                        <p class="text-xs text-[#5A6478] mt-0.5">Pengalaman kerja, pelatihan, course, atau sertifikasi.</p>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-[#1A1A2E] mb-2">Judul *</label>
-                                <input name="title" type="text" value="{{ old('title') }}" required placeholder="Contoh: Senior Web Developer" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#1565C0] transition-colors">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-[#1A1A2E] mb-2">Tipe *</label>
-                                <select name="type" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#1565C0] transition-colors">
-                                    <option value="experience" {{ old('type') === 'experience' ? 'selected' : '' }}>Experience</option>
-                                    <option value="course" {{ old('type') === 'course' ? 'selected' : '' }}>Course</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-[#1A1A2E] mb-2">Deskripsi</label>
-                            <textarea name="description" rows="5" placeholder="Jelaskan tanggung jawab, kompetensi, hasil kerja, atau materi yang dipelajari." class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#1565C0] transition-colors">{{ old('description') }}</textarea>
-                        </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-5 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg hover:bg-[#0D47A1]">Tambah Experience</button>
-                        </div>
-                    </div>
-                </form>
-            @endif
-
-            <div class="bg-white border border-[#1565C0]/15 rounded-xl shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-gray-100">
-                    <h2 class="font-heading font-bold text-[#1A1A2E]">Learning Experiences Tersimpan</h2>
-                </div>
-                <div class="divide-y divide-gray-100">
-                    @forelse($experiences as $experience)
-                        <div class="p-6">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h3 class="text-sm font-bold text-[#1A1A2E]">{{ $experience->title }}</h3>
-                                    <span class="inline-flex mt-2 px-2 py-1 bg-blue-50 text-[#1565C0] text-[10px] font-bold rounded-full">{{ str($experience->type)->title() }}</span>
-                                </div>
-                                <span class="text-[10px] text-[#5A6478]">{{ optional($experience->created_at)->format('d M Y') }}</span>
-                            </div>
-                            <p class="mt-3 text-xs text-[#5A6478] leading-relaxed">{{ $experience->description ?: 'Tidak ada deskripsi.' }}</p>
-                        </div>
-                    @empty
-                        <div class="p-8 text-center text-sm text-[#5A6478]">Belum ada learning experience.</div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div class="flex justify-between pt-4">
-                <a href="{{ route('applicant.documents') }}" class="px-6 py-2.5 border border-gray-300 text-[#5A6478] text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">Kembali</a>
-                <div class="flex gap-3">
-                    @if(in_array($application->status, ['draft', 'submitted'], true))
-                        <form method="POST" action="{{ route('applicant.applications.cancel', $application) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="px-6 py-2.5 border border-red-200 text-red-600 text-sm font-bold rounded-lg hover:bg-red-50">Cancel</button>
-                        </form>
-                    @endif
-                    @if(in_array($application->status, ['draft', 'rejected'], true))
-                        <form method="POST" action="{{ route('applicant.applications.submit', $application) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="px-6 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg hover:bg-[#0D47A1]">Submit Application</button>
-                        </form>
-                    @endif
-                </div>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+            <h3 class="text-xs font-bold text-[#1565C0] mb-2">Petunjuk Pengisian</h3>
+            <ul class="text-xs text-[#5A6478] space-y-1.5 leading-relaxed">
+                <li>Jelaskan pengalaman kerja atau course yang relevan dengan program studi tujuan.</li>
+                <li>Sertakan tanggung jawab, pencapaian, dan kompetensi yang diperoleh pada deskripsi.</li>
+                <li>Minimal satu pengalaman diperlukan sebelum submit application.</li>
+            </ul>
         </div>
-
-        <div class="space-y-4">
-            <div class="bg-white border border-[#1565C0]/15 rounded-xl p-6 shadow-sm">
-                <h3 class="font-heading font-bold text-[#1A1A2E] mb-4">Ringkasan Application</h3>
-                <div class="space-y-3 text-xs text-[#5A6478]">
-                    <div class="flex justify-between"><span>Status</span><strong class="text-[#1A1A2E]">{{ str($application->status)->title() }}</strong></div>
-                    <div class="flex justify-between"><span>Dokumen</span><strong class="text-[#1A1A2E]">{{ $documentsCount }}</strong></div>
-                    <div class="flex justify-between"><span>Experience</span><strong class="text-[#1A1A2E]">{{ $experiences->count() }}</strong></div>
-                    <div class="flex justify-between"><span>Prodi</span><strong class="text-[#1A1A2E]">{{ $application->prodi?->nama_prodi ?? '-' }}</strong></div>
+        <form id="experienceForm" class="bg-white border border-[#1565C0]/15 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h2 class="font-heading font-bold text-[#1A1A2E]">Tambah Learning Experience</h2>
+                    <p class="text-xs text-[#5A6478] mt-0.5">Pengalaman kerja, pelatihan, course, atau sertifikasi.</p>
                 </div>
+                <span class="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full">Wajib</span>
             </div>
-
-            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
-                <h3 class="text-xs font-bold text-[#1565C0] mb-3">Syarat Submit</h3>
-                <ul class="text-xs text-[#5A6478] space-y-2 leading-relaxed">
-                    <li>Minimal satu dokumen terupload.</li>
-                    <li>Minimal satu learning experience terisi.</li>
-                    <li>Status application harus draft atau rejected.</li>
-                </ul>
+            <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-[#1A1A2E] mb-2">Application</label>
+                <select id="applicationSelect" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm"></select>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold text-[#1A1A2E] mb-2">Judul</label><input id="experienceTitle" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm"></div>
+                <div><label class="block text-xs font-bold text-[#1A1A2E] mb-2">Tipe</label><select id="experienceType" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm"><option value="experience">Experience</option><option value="course">Course</option></select></div>
+            </div>
+            <div><label class="block text-xs font-bold text-[#1A1A2E] mb-2">Deskripsi</label><textarea id="experienceDescription" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm"></textarea></div>
+            <div class="flex justify-end">
+                <button type="submit" class="px-5 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg">Tambah Experience</button>
+            </div>
+            </div>
+        </form>
+        <div class="bg-white border border-[#1565C0]/15 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="font-heading font-bold text-[#1A1A2E]">Learning Experiences Tersimpan</h2>
+            </div>
+            <div id="experiencesList" class="divide-y divide-gray-100 text-sm text-[#5A6478]">Pilih application.</div>
         </div>
     </div>
-@endif
+    <div class="bg-white border border-[#1565C0]/15 rounded-xl shadow-sm p-6">
+        <h3 class="font-heading font-bold text-[#1A1A2E] mb-4">Review & Submit</h3>
+        <p class="text-xs text-[#5A6478] leading-relaxed">Submit akan memanggil endpoint <code>PATCH /api/applications/{id}/submit</code>. Backend akan menolak jika dokumen atau learning experience belum ada.</p>
+        <button id="submitButton" type="button" class="w-full mt-6 px-5 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg">Submit Application</button>
+    </div>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+    const appSelect = document.getElementById('applicationSelect');
+    const list = document.getElementById('experiencesList');
+    const alertBox = document.getElementById('outcomeAlert');
+    const showAlert = (message, ok = true) => {
+        alertBox.textContent = message;
+        alertBox.className = `mb-6 p-4 rounded-xl text-sm font-bold ${ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`;
+    };
+    async function loadApplications() {
+        const { data } = await axios.get('/api/applications');
+        appSelect.innerHTML = data.length ? data.map((app) => `<option value="${app.id}">${app.prodi?.nama_prodi || 'Application'} - ${app.status}</option>`).join('') : '<option value="">Belum ada application</option>';
+        if (data.length) loadExperiences();
+    }
+    async function loadExperiences() {
+        if (!appSelect.value) return;
+        const { data } = await axios.get(`/api/applications/${appSelect.value}/learning-experiences`);
+        list.innerHTML = data.length ? data.map((item) => `<div class="p-6"><div class="flex items-start justify-between gap-4"><div><p class="text-sm font-bold text-[#1A1A2E]">${item.title}</p><span class="inline-flex mt-2 px-2 py-1 bg-blue-50 text-[#1565C0] text-[10px] font-bold rounded-full">${item.type}</span></div></div><p class="mt-3 text-xs text-[#5A6478] leading-relaxed">${item.description || 'Tidak ada deskripsi.'}</p></div>`).join('') : '<div class="p-8 text-center text-sm text-[#5A6478]">Belum ada learning experience.</div>';
+    }
+    document.getElementById('experienceForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        try {
+            await axios.post(`/api/applications/${appSelect.value}/learning-experiences`, {
+                title: document.getElementById('experienceTitle').value,
+                type: document.getElementById('experienceType').value,
+                description: document.getElementById('experienceDescription').value,
+            });
+            showAlert('Learning experience berhasil ditambahkan.');
+            loadExperiences();
+        } catch (error) {
+            showAlert(error.response?.data?.message || 'Gagal menambah experience.', false);
+        }
+    });
+    document.getElementById('submitButton').addEventListener('click', async () => {
+        try {
+            await axios.patch(`/api/applications/${appSelect.value}/submit`);
+            showAlert('Application submitted successfully.');
+            loadApplications();
+        } catch (error) {
+            showAlert(error.response?.data?.message || 'Submit gagal.', false);
+        }
+    });
+    appSelect.addEventListener('change', loadExperiences);
+    loadApplications().catch((error) => showAlert(error.response?.data?.message || 'Gagal memuat applications.', false));
+});
+</script>
 
 @endsection

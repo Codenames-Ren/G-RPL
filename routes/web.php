@@ -11,32 +11,36 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use App\Models\Applicant;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ManagerController;
-use App\Http\Controllers\ApplicantController;
 
 // 1. Halaman Beranda (Landing Page)
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// 2. Halaman Dashboard Mahasiswa (Bypass Login untuk FE)
-Route::get('/dashboard', [ApplicantController::class, 'dashboard'])->name('dashboard');
-Route::get('/applicant/status', [ApplicantController::class, 'status'])->name('applicant.status');
+// 2. Halaman Dashboard Mahasiswa (Page routes only; data loaded via API)
+Route::get('/dashboard', function () {
+    return view('applicant.dashboard');
+})->name('dashboard');
+Route::get('/applicant/status', function () {
+    return view('applicant.status');
+})->name('applicant.status');
 
 // ===== Routes untuk Applicant =====
-Route::get('/applicant/profile', [ApplicantController::class, 'profile'])->name('applicant.profile');
-Route::post('/applicant/profile', [ApplicantController::class, 'updateProfile'])->name('applicant.profile.update');
+Route::get('/applicant/profile', function () {
+    return view('applicant.profile');
+})->name('applicant.profile');
 
-Route::get('/applicant/program', [ApplicantController::class, 'program'])->name('applicant.program');
-Route::post('/applicant/program', [ApplicantController::class, 'saveProgram'])->name('applicant.program.save');
+Route::get('/applicant/program', function () {
+    return view('applicant.program');
+})->name('applicant.program');
 
-Route::get('/applicant/documents', [ApplicantController::class, 'documents'])->name('applicant.documents');
-Route::post('/applicant/applications/{application}/documents', [ApplicantController::class, 'uploadDocument'])->name('applicant.documents.upload');
+Route::get('/applicant/documents', function () {
+    return view('applicant.documents');
+})->name('applicant.documents');
 
-Route::get('/applicant/outcomes', [ApplicantController::class, 'outcomes'])->name('applicant.outcomes');
-Route::post('/applicant/applications/{application}/experiences', [ApplicantController::class, 'storeExperience'])->name('applicant.experiences.store');
-Route::patch('/applicant/applications/{application}/submit', [ApplicantController::class, 'submit'])->name('applicant.applications.submit');
-Route::patch('/applicant/applications/{application}/cancel', [ApplicantController::class, 'cancel'])->name('applicant.applications.cancel');
+Route::get('/applicant/outcomes', function () {
+    return view('applicant.outcomes');
+})->name('applicant.outcomes');
 
 // 3. Halaman Informasi Publik
 Route::get('/tentang-rpl', function () {
@@ -69,16 +73,25 @@ Route::get('/asesor/riwayat', function () {
 })->name('assessor.history');
 
 // ===== Routes Manajer/Pengelola =====
-Route::get('/dashboard-manager', [ManagerController::class, 'dashboard'])->name('dashboard.manager');
+Route::get('/dashboard-manager', function () {
+    return view('manager.dashboard');
+})->name('dashboard.manager');
 
-Route::get('/manager/pengajuan', [ManagerController::class, 'applications'])->name('manager.applications');
+Route::get('/manager/pengajuan', function () {
+    return view('manager.applications');
+})->name('manager.applications');
 
-Route::get('/manager/assign', [ManagerController::class, 'assignment'])->name('manager.assignment');
-Route::post('/manager/applications/{application}/assign', [ManagerController::class, 'assign'])->name('manager.applications.assign');
+Route::get('/manager/assign', function () {
+    return view('manager.assignment');
+})->name('manager.assignment');
 
-Route::get('/manager/asesor', [ManagerController::class, 'asesors'])->name('manager.asesors');
+Route::get('/manager/asesor', function () {
+    return view('manager.asesors');
+})->name('manager.asesors');
 
-Route::get('/manager/laporan', [ManagerController::class, 'reports'])->name('manager.reports');
+Route::get('/manager/laporan', function () {
+    return view('manager.reports');
+})->name('manager.reports');
 
 // ===== AUTH ROUTES =====
 
