@@ -22,6 +22,7 @@ class AssignmentController extends Controller
         ])
         ->whereIn('status', [
             'submitted',
+            'rejected',
             'assigned',
             'assessed',
             'approved',
@@ -139,6 +140,46 @@ class AssignmentController extends Controller
             'message' => 'Asesor assigned successfully',
             'assignment' => $assignment
         ], 201);
+    }
+
+    //Rejection layer for manager
+    public function rejectApplication(Request $request, $applicationId)
+    {
+        $request->validate([
+            'rejection_note' => 'required|string'
+        ]);
+
+        $application = Application::find($applicationId);
+
+        if (!$application) {
+            return response()->json([
+                'message' => 'Application not found'
+            ], 404);
+        }
+
+        // only submitted application can be rejected
+        if ($application->status !== 'submitted') {
+            return response()->json([
+                'message' => 'Application cannot be rejected'
+            ], 403);
+        }
+
+        // prevent reject if already assigned
+        if ($application->latestAssignment) {
+            return response()->json([
+                'message' => 'Application already assigned'
+            ], 403);
+        }
+
+        $application->update([
+            'status' => 'rejected',
+            'rejection_note' => $request->rejection_note,
+        ]);
+
+        return response()->json([
+            'message' => 'Application rejected successfully',
+            'application' => $application
+        ]);
     }
 
     // Get assignment history
