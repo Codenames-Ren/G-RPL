@@ -137,4 +137,9 @@ Route::middleware([
     Route::get('/manager/applications/{applicationId}/assignments', [
         AssignmentController::class, 'getAssignmentHistory'
     ]);
+
+    // Reject application
+    Route::patch('/manager/applications/{applicationId}/reject', [
+        AssignmentController::class, 'rejectApplication'
+    ])->middleware('throttle:5,1');
 });
