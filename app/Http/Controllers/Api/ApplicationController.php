@@ -139,7 +139,8 @@ class ApplicationController extends Controller
         }
 
         $application->update([
-            'status' => 'submitted'
+            'status' => 'submitted',
+            'rejection_note' => null,
         ]);
 
         return response()->json([
