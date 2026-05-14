@@ -3,6 +3,12 @@
 
 @section('content')
 
+@php
+    $managerUser = Auth::user();
+    $managerName = $managerUser?->name ?? $managerUser?->rplManager?->nama ?? 'RPL Manager';
+    $managerInitials = str($managerName)->explode(' ')->filter()->map(fn ($part) => str($part)->substr(0, 1))->take(2)->join('');
+@endphp
+
 <div class="flex min-h-screen bg-[#F5F6FA]" x-data="{ sidebarOpen: false }">
     
     {{-- Sidebar Mobile Overlay --}}
@@ -53,9 +59,9 @@
 
         <div class="p-4 border-t border-[#1565C0]/10">
             <div class="bg-[#F5F6FA] p-3 rounded-lg flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">AM</div>
+                <div class="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">{{ $managerInitials ?: 'RM' }}</div>
                 <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-[#1A1A2E] truncate">Ahmad Maulana</p>
+                    <p class="text-xs font-bold text-[#1A1A2E] truncate">{{ $managerName }}</p>
                     <p class="text-[10px] text-[#5A6478] truncate">RPL Manager</p>
                 </div>
             </div>

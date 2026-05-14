@@ -55,7 +55,7 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
         'message' => 'Email verified successfully'
     ]);
 
-})->middleware('signed')->name('verification.verify');
+})->middleware('signed')->name('api.verification.verify');
 
 // Auth superadmin role
 Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {

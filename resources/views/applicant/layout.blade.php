@@ -3,6 +3,14 @@
 
 @section('content')
 
+@php
+    $applicantUser = Auth::user();
+    $applicantName = $applicantUser?->applicant?->nama ?? $applicantUser?->name ?? 'Calon Mahasiswa';
+    $applicantInitials = str($applicantName)->explode(' ')->filter()->map(fn ($part) => str($part)->substr(0, 1))->take(2)->join('');
+    $currentApplication = $application ?? null;
+    $currentStatus = $currentApplication?->status ?? 'draft';
+@endphp
+
 <div class="flex min-h-screen bg-[#F5F6FA]" x-data="{ sidebarOpen: false }">
     
     {{-- Sidebar Mobile Overlay --}}
@@ -63,8 +71,8 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Dashboard
             </a>
-            <a href="#" 
-               class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-colors text-[#5A6478] hover:bg-gray-50">
+            <a href="{{ route('applicant.status') }}" 
+               class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-colors {{ Route::is('applicant.status') ? 'bg-[#E3F0FF] text-[#1565C0]' : 'text-[#5A6478] hover:bg-gray-50' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 Lihat Status
             </a>
@@ -73,9 +81,9 @@
         {{-- User Info --}}
         <div class="p-4 border-t border-[#1565C0]/10">
             <div class="bg-[#F5F6FA] p-3 rounded-lg flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">BS</div>
+                <div class="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">{{ $applicantInitials ?: 'CM' }}</div>
                 <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-[#1A1A2E] truncate">Budi Santoso</p>
+                    <p class="text-xs font-bold text-[#1A1A2E] truncate">{{ $applicantName }}</p>
                     <p class="text-[10px] text-[#5A6478] truncate">Calon Mahasiswa</p>
                 </div>
             </div>
@@ -104,7 +112,7 @@
             
             {{-- Kanan: Status & Notifikasi --}}
             <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <span class="text-[10px] font-bold px-2 py-1 bg-yellow-50 text-[#F9A825] rounded-full uppercase">Draft</span>
+                <span class="text-[10px] font-bold px-2 py-1 bg-yellow-50 text-[#F9A825] rounded-full uppercase">{{ $currentStatus }}</span>
                 
                 {{-- Lonceng Notifikasi --}}
                 <button class="relative p-2 text-gray-400 hover:text-[#1565C0] transition-colors">
