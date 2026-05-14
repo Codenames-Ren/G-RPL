@@ -14,6 +14,7 @@ class Application extends Model
         'prodi_id',
         'konsentrasi_id',
         'status',
+        'rejection_note'
     ];
 
     protected $keyType = 'string';
