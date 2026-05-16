@@ -32,4 +32,9 @@ class LearningExperience extends Model
     {
         return $this->belongsTo(Application::class);
     }
+
+    public function assessmentDetails()
+    {
+        return $this->hasMany(AssessmentDetail::class);
+    }
 }
