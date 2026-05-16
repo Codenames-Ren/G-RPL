@@ -1,58 +1,188 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# G-RPL — Recognition of Prior Learning System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+G-RPL is a web-based Recognition of Prior Learning (RPL) system built using Laravel and API-first architecture.
+This system is designed to manage academic recognition workflows, including application submission, document verification, asesor assignment, and SKS/course conversion assessment.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Authentication & Authorization
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Laravel Sanctum Authentication
+* Role-Based Access Control (RBAC)
+* Email Verification
+* Rate Limiting Protection
 
-## Learning Laravel
+## Applicant Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Create and manage RPL applications
+* Upload required documents
+* Add learning experiences
+* Submit and update applications
+* Cancel submitted applications
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Manager Features
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+* Review submitted applications
+* Reject incomplete applications
+* Assign asesor based on study program
+* View assignment history
 
-## Agentic Development
+## Asesor Features
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+* Review assigned applications
+* Approve or reject academic assessments
+* Convert learning experiences into courses/SKS
+* Reuse existing course mappings
+* Create new course mappings inline
+
+---
+
+# 🏗️ Architecture
+
+This project uses an **API-first architecture**.
+
+* Backend handles:
+
+  * Authentication
+  * Business Logic
+  * Validation
+  * Database Operations
+  * API Responses
+
+* Frontend handles:
+
+  * UI Rendering
+  * API Consumption
+  * State Management
+  * User Interaction
+
+Communication between frontend and backend is performed using REST API with JSON responses.
+
+---
+
+# 🛠️ Tech Stack
+
+## Backend
+
+* Laravel
+* Laravel Sanctum
+* MySQL
+* Laravel Scramble (API Documentation)
+
+## Frontend
+
+* Blade
+* Tailwind CSS
+* Axios
+* Alpine.js
+
+---
+
+# 🔐 Roles
+
+| Role       | Responsibility                 |
+| ---------- | ------------------------------ |
+| Superadmin | Manage staff accounts          |
+| Applicant  | Submit RPL application         |
+| Manager    | Verify and assign applications |
+| Asesor     | Perform academic assessment    |
+
+---
+
+# 📚 API Documentation
+
+This project uses **Laravel Scramble** for API documentation.
+
+Access API Docs:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+http://localhost:8000/docs/api
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+# ⚙️ Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Clone Repository
 
-## Code of Conduct
+```bash
+git clone <repository-url>
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Install Dependencies
 
-## Security Vulnerabilities
+```bash
+composer install
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Setup Environment
 
-## License
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Configure Database
+
+Edit `.env` file:
+
+```env
+DB_DATABASE=grpl
+DB_USERNAME=root
+DB_PASSWORD=YOUR_DATABASE_PASSWORD
+```
+
+---
+
+# 🗄️ Run Migration
+
+```bash
+php artisan migrate
+```
+
+---
+
+# 🚀 Run Application
+
+## Backend
+
+```bash
+php artisan serve
+```
+
+## Frontend
+
+```bash
+npm run dev
+```
+
+---
+
+# 👥 Contributors
+
+| GitHub                                            | Role                       |
+| ------------------------------------------------- | -------------------------- |
+| [Codenames-Ren](https://github.com/Codenames-Ren) | Backend Developer          |
+| [Rafreaks06](https://github.com/Rafreaks06)       | Frontend Developer         |
+| [Diasmyri](https://github.com/Diasmyri)           | Frontend Developer & UI/UX |
+
+---
+
+# 📌 Notes
+
+This project was developed as part of an academic software engineering project focusing on:
+
+* API-first development
+* RBAC implementation
+* Academic workflow management
+* RESTful API integration
+* Team collaboration workflow
+
+---
+
+# 📄 License
+
+This project is developed for educational purposes.
