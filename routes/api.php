@@ -147,7 +147,7 @@ Route::middleware([
     ])->middleware('throttle:5,1');
 });
 
-// Asesor Routes
+// Asesor Routes.
 Route::middleware([
     'auth:sanctum',
     'role:asesor'
