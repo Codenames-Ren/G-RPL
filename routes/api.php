@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApplicationDocumentController;
 use App\Http\Controllers\Api\LearningExperienceController;
 use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\AsesorController;
 use App\Models\Prodi;
 
 //Auth Routes
@@ -143,5 +144,32 @@ Route::middleware([
     // Reject application
     Route::patch('/manager/applications/{applicationId}/reject', [
         AssignmentController::class, 'rejectApplication'
+    ])->middleware('throttle:5,1');
+});
+
+// Asesor Routes
+Route::middleware([
+    'auth:sanctum',
+    'role:asesor'
+])->group(function () {
+
+    // get assigned applications
+    Route::get('/asesor/applications', [
+        AsesorController::class, 'getAssignedApplications'
+    ]);
+
+    // get application detail
+    Route::get('/asesor/applications/{id}', [
+        AsesorController::class, 'getApplicationDetail'
+    ]);
+
+    // get available courses
+    Route::get('/asesor/applications/{applicationId}/courses', [
+        AsesorController::class, 'getAvailableCourses'
+    ]);
+
+    // create assessment
+    Route::post('/asesor/applications/{applicationId}/assessment', [
+        AsesorController::class, 'createAssessment'
     ])->middleware('throttle:5,1');
 });
