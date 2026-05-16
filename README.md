@@ -108,7 +108,7 @@ http://localhost:8000/docs/api
 ## Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Codenames-Ren/G-RPL.git
 ```
 
 ## Install Dependencies
