@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignUuid('konsentrasi_id')
                 ->nullable()
                 ->constrained('konsentrasis')
-                ->nulldeOnDelete();
+                ->nullOnDelete();
             
             $table->string('kode_mk')->unique();
             
