@@ -43,4 +43,9 @@ class Asesor extends Model
     {
         return $this->hasMany(Assignment::class);
     }
+
+    public function assessments()
+    {
+        return $this->hasMany(Assessment::class);
+    }
 }
