@@ -65,4 +65,9 @@ class Application extends Model
     {
         return $this->hasOne(Assignment::class)->latestOfMany();
     }
+
+    public function assessments()
+    {
+        return $this->hasMany(Assessment::class);
+    }
 }
