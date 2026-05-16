@@ -18,8 +18,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
             
             $table->foreignUuid('konsentrasi_id')
+                ->nullable()
                 ->constrained('konsentrasis')
-                ->cascadeOnDelete();
+                ->nulldeOnDelete();
+            
+            $table->string('kode_mk')->unique();
             
             $table->string('nama_matkul');
             
