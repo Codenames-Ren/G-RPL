@@ -15,6 +15,10 @@
     </style>
 </head>
 <body class="bg-[#F5F6FA] text-[#1A1A2E] antialiased">
-    @yield('content')
+    @isset($slot)
+        {{ $slot }}
+    @else
+        @yield('content')
+    @endisset
 </body>
 </html>

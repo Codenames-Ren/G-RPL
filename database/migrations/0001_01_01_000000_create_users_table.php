@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['applicant', 'manager', 'asesor', 'superadmin'])->default('applicant');
             $table->boolean('is_active')->default(true);
+            $table->rememberToken();
             $table->timestamps();
         });
 

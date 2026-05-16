@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApplicationDocumentController;
 use App\Http\Controllers\Api\LearningExperienceController;
 use App\Http\Controllers\Api\AssignmentController;
+use App\Models\Prodi;
 
 //Auth Routes
 Route::prefix('auth')->group(function () {
@@ -55,7 +56,7 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
         'message' => 'Email verified successfully'
     ]);
 
-})->middleware('signed')->name('verification.verify');
+})->middleware('signed')->name('api.verification.verify');
 
 // Auth superadmin role
 Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
@@ -70,6 +71,7 @@ Route::middleware([
     'auth:sanctum',
     'role:applicant'
 ])->group(function () {
+    Route::get('/prodis', fn () => Prodi::with('konsentrasis')->orderBy('nama_prodi')->get());
     
     //Applications Route
     Route::post('/applications', [ApplicationController::class, 'createApplication'])
