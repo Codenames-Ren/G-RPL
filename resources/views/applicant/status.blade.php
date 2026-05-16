@@ -27,7 +27,7 @@ window.addEventListener('load', async () => {
                     </div>
                     <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700">${esc(app.status)}</span>
                 </div>
-                <p class="text-xs text-[#5A6478] mt-3">${app.status === 'submitted' ? 'Menunggu assignment manager.' : app.status === 'assigned' ? 'Menunggu assessment asesor.' : 'Pantau status pengajuan di sini.'}</p>
+                <p class="text-xs text-[#5A6478] mt-3">${app.status === 'submitted' ? 'Menunggu assignment manager.' : app.status === 'assigned' ? 'Menunggu assessment asesor.' : app.status === 'rejected' ? `Pengajuan direject. Alasan: ${esc(app.rejection_note || 'Tidak ada catatan.')}` : 'Pantau status pengajuan di sini.'}</p>
             </div>
         `).join('') : 'Belum ada application.';
     } catch (error) {

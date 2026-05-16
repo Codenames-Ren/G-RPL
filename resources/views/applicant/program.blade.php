@@ -7,7 +7,7 @@
 
 <div class="mb-8">
     <h1 class="font-heading text-2xl font-bold text-[#1A1A2E]">Pilih Tipe RPL & Program Studi</h1>
-    <p class="text-sm text-[#5A6478] mt-1">Form ini submit ke endpoint <code>POST /api/applications</code>.</p>
+    <p id="formEndpointText" class="text-sm text-[#5A6478] mt-1">Form ini submit ke endpoint <code>POST /api/applications</code>.</p>
 </div>
 
 <form id="programForm" class="space-y-6">
@@ -82,26 +82,59 @@ window.addEventListener('load', () => {
     const prodiSelect = document.getElementById('prodiSelect');
     const konsentrasiSelect = document.getElementById('konsentrasiSelect');
     const alertBox = document.getElementById('programAlert');
+    const endpointText = document.getElementById('formEndpointText');
     let prodis = [];
+    let currentApplication = null;
+
+    const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
     const showAlert = (message, ok = true) => {
         alertBox.textContent = message;
         alertBox.className = `mb-6 p-4 rounded-xl text-sm font-bold ${ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`;
+    };
+    const renderKonsentrasi = (selected = '') => {
+        const prodi = prodis.find((item) => String(item.id) === String(prodiSelect.value));
+        konsentrasiSelect.innerHTML = '<option value="">-- Pilih Konsentrasi --</option>' + (prodi?.konsentrasis || []).map((item) => `<option value="${esc(item.id)}" ${String(item.id) === String(selected) ? 'selected' : ''}>${esc(item.nama_konsentrasi)}</option>`).join('');
+    };
+    const hydrateForm = () => {
+        if (!currentApplication || !prodis.length) return;
+
+        const type = currentApplication.jenis_RPL || currentApplication.jenis_rpl;
+        const typeInput = form.querySelector(`[name="jenis_rpl"][value="${type}"]`);
+        if (typeInput) typeInput.checked = true;
+
+        prodiSelect.value = currentApplication.prodi_id || currentApplication.prodi?.id || '';
+        renderKonsentrasi(currentApplication.konsentrasi_id || currentApplication.konsentrasi?.id || '');
+
+        endpointText.innerHTML = `Form ini update ke endpoint <code>PUT /api/applications/${esc(currentApplication.id)}</code>.`;
+        if (currentApplication.status === 'rejected') {
+            showAlert(`Pengajuan Anda direject. Alasan: ${currentApplication.rejection_note || 'Tidak ada catatan.'} Silakan perbaiki data lalu submit ulang dari dashboard.`, false);
+        }
     };
 
     async function loadProdis() {
         try {
             const { data } = await axios.get('/api/prodis');
             prodis = data;
-            prodiSelect.innerHTML = '<option value="">-- Pilih Program Studi --</option>' + prodis.map((prodi) => `<option value="${prodi.id}">${prodi.nama_prodi}</option>`).join('');
+            prodiSelect.innerHTML = '<option value="">-- Pilih Program Studi --</option>' + prodis.map((prodi) => `<option value="${esc(prodi.id)}">${esc(prodi.nama_prodi)}</option>`).join('');
+            hydrateForm();
         } catch (error) {
             prodiSelect.innerHTML = '<option value="">Gagal memuat prodi</option>';
             showAlert(error.response?.data?.message || 'Gagal memuat /api/prodis.', false);
         }
     }
 
+    async function loadCurrentApplication() {
+        try {
+            const { data } = await axios.get('/api/applications');
+            currentApplication = data.find((app) => ['draft', 'rejected'].includes(app.status)) || null;
+            hydrateForm();
+        } catch (error) {
+            showAlert(error.response?.data?.message || 'Gagal memuat application applicant.', false);
+        }
+    }
+
     prodiSelect.addEventListener('change', () => {
-        const prodi = prodis.find((item) => item.id === prodiSelect.value);
-        konsentrasiSelect.innerHTML = '<option value="">-- Pilih Konsentrasi --</option>' + (prodi?.konsentrasis || []).map((item) => `<option value="${item.id}">${item.nama_konsentrasi}</option>`).join('');
+        renderKonsentrasi();
     });
 
     form.addEventListener('submit', async (event) => {
@@ -112,14 +145,18 @@ window.addEventListener('load', () => {
             konsentrasi_id: konsentrasiSelect.value || null,
         };
         try {
-            await axios.post('/api/applications', payload);
+            if (currentApplication) {
+                await axios.put(`/api/applications/${currentApplication.id}`, payload);
+            } else {
+                await axios.post('/api/applications', payload);
+            }
             window.location.href = '{{ route('applicant.documents') }}';
         } catch (error) {
-            showAlert(error.response?.data?.message || 'Gagal membuat application.', false);
+            showAlert(error.response?.data?.message || 'Gagal menyimpan application.', false);
         }
     });
 
-    loadProdis();
+    Promise.all([loadProdis(), loadCurrentApplication()]);
 });
 </script>
 

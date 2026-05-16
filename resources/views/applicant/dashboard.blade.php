@@ -142,7 +142,9 @@ window.addEventListener('load', async () => {
 
         document.getElementById('noticeTitle').textContent = latestApplication ? `Status: ${status}` : 'Status: Belum Ada Pengajuan';
         document.getElementById('noticeText').textContent = latestApplication
-            ? (status === 'submitted' ? 'Pengajuan sudah dikirim dan menunggu assignment manager.' : 'Pantau dan lengkapi tahapan pengajuan Anda.')
+            ? (status === 'rejected'
+                ? `Pengajuan direject. Alasan: ${latestApplication.rejection_note || 'Tidak ada catatan.'} Silakan perbaiki data lalu submit ulang.`
+                : (status === 'submitted' ? 'Pengajuan sudah dikirim dan menunggu assignment manager.' : 'Pantau dan lengkapi tahapan pengajuan Anda.'))
             : 'Anda belum membuat application. Silakan mulai dari tahap pilih program.';
 
         setStepDone('profile', true);
@@ -157,6 +159,7 @@ window.addEventListener('load', async () => {
                     <span class="px-2 py-1 rounded text-[10px] font-bold bg-blue-50 text-blue-700">${esc(app.status)}</span>
                 </div>
                 <p class="text-[10px] text-[#5A6478] mt-1">Tipe ${esc(app.jenis_RPL || app.jenis_rpl)} | APP-${esc(app.id).slice(0, 8).toUpperCase()}</p>
+                ${app.status === 'rejected' ? `<p class="text-[10px] text-red-600 mt-2">Alasan: ${esc(app.rejection_note || 'Tidak ada catatan.')}</p>` : ''}
             </div>
         `).join('') : '<p class="text-xs text-[#5A6478]">Belum ada application.</p>';
 

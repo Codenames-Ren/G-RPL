@@ -44,6 +44,8 @@ class AssignmentController extends Controller
             'learningExperiences',
             'assignments.asesor',
             'assignments.manager',
+            'assessments.asesor',
+            'assessments.assessmentDetails.course',
         ])->find($id);
 
         if (!$application) {
