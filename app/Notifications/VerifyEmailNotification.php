@@ -3,11 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class VerifyEmailNotification extends Notification
+class VerifyEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -34,7 +35,7 @@ class VerifyEmailNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        // generate signed verification URL
+        // Generate signed verification URL
         $verifyUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
@@ -47,13 +48,14 @@ class VerifyEmailNotification extends Notification
         );
 
         return (new MailMessage)
-            ->subject('Verify Your G-RPL Account')
-            ->greeting('Hello, ' . $notifiable->name . '!')
-            ->line('Thank you for registering to G-RPL.')
-            ->line('Please verify your email address to continue using the system.')
-            ->action('Verify Email', $verifyUrl)
-            ->line('This verification link will expire in 60 minutes.')
-            ->line('If you did not create an account, no further action is required.');
+            ->subject('Verifikasi Email Akun G-RPL')
+            ->greeting('Halo, ' . $notifiable->name . ' 👋')
+            ->line('Terima kasih telah mendaftar di sistem G-RPL.')
+            ->line('Silakan lakukan verifikasi email untuk mengaktifkan akun Anda dan melanjutkan proses pengajuan RPL.')
+            ->action('Verifikasi Email', $verifyUrl)
+            ->line('Link verifikasi ini berlaku selama 60 menit.')
+            ->line('Apabila Anda tidak merasa melakukan pendaftaran akun, abaikan email ini.')
+            ->salutation('Salam, Tim G-RPL');
     }
 
     /**
