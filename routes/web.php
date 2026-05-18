@@ -12,37 +12,11 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Applicant;
 use App\Http\Controllers\ProfileController;
 
-// 1. Halaman Beranda (Landing Page)
+//PUBLIC PAGES
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// 2. Halaman Dashboard Mahasiswa (Page routes only; data loaded via API)
-Route::get('/dashboard', function () {
-    return view('applicant.dashboard');
-})->name('dashboard');
-Route::get('/applicant/status', function () {
-    return view('applicant.status');
-})->name('applicant.status');
-
-// ===== Routes untuk Applicant =====
-Route::get('/applicant/profile', function () {
-    return view('applicant.profile');
-})->name('applicant.profile');
-
-Route::get('/applicant/program', function () {
-    return view('applicant.program');
-})->name('applicant.program');
-
-Route::get('/applicant/documents', function () {
-    return view('applicant.documents');
-})->name('applicant.documents');
-
-Route::get('/applicant/outcomes', function () {
-    return view('applicant.outcomes');
-})->name('applicant.outcomes');
-
-// 3. Halaman Informasi Publik
 Route::get('/tentang-rpl', function () {
     return view('pages.about');
 })->name('about');
@@ -59,91 +33,116 @@ Route::get('/pengumuman', function () {
     return view('pages.announcements');
 })->name('announcements');
 
-// 4. Routes Asesor
-Route::get('/dashboard-asesor', function () {
-    return view('assessor.dashboard');
-})->name('dashboard.assessor');
 
-Route::get('/asesor/antrean', function () {
-    return view('assessor.queue');
-})->name('assessor.queue');
+/*
+AUTH ROUTES
+*/
 
-Route::get('/asesor/riwayat', function () {
-    return view('assessor.history');
-})->name('assessor.history');
-
-// ===== Routes Manajer/Pengelola =====
-Route::get('/dashboard-manager', function () {
-    return view('manager.dashboard');
-})->name('dashboard.manager');
-
-Route::get('/manager/pengajuan', function () {
-    return view('manager.applications');
-})->name('manager.applications');
-
-Route::get('/manager/assign', function () {
-    return view('manager.assignment');
-})->name('manager.assignment');
-
-Route::get('/manager/asesor', function () {
-    return view('manager.asesors');
-})->name('manager.asesors');
-
-Route::get('/manager/laporan', function () {
-    return view('manager.reports');
-})->name('manager.reports');
-
-// ===== AUTH ROUTES =====
-
-// --- LOGIN ---
+// LOGIN PAGE
 Route::get('/login', function () {
     return view('auth.login');
-})->name('login');
+})->middleware('guest')->name('login');
 
+// LOGIN PROCESS
 Route::post('/login', function (Request $request) {
+
     $request->validate([
         'identifier' => 'required_without:email|string|nullable',
         'email'      => 'required_without:identifier|email|nullable',
         'password'   => 'required|string',
     ]);
 
-    $identifier = $request->input('identifier', $request->input('email'));
+    $identifier = $request->input(
+        'identifier',
+        $request->input('email')
+    );
 
-    // Cari user berdasarkan email atau NIK
+    // Find user by email or NIK
     $user = User::where('email', $identifier)
-        ->orWhereHas('applicant', fn($q) => $q->where('nik', $identifier))
+        ->orWhereHas('applicant', function ($query) use ($identifier) {
+            $query->where('nik', $identifier);
+        })
         ->first();
 
-    if (!$user || !Hash::check($request->password, $user->password)) {
+    // Invalid credentials
+    if (
+        !$user ||
+        !Hash::check($request->password, $user->password)
+    ) {
         return back()
-            ->withInput($request->only('identifier', 'remember'))
-            ->withErrors(['identifier' => 'Email, NIK, atau kata sandi salah.']);
+            ->withInput(
+                $request->only('identifier', 'remember')
+            )
+            ->withErrors([
+                'identifier' =>
+                    'Email, NIK, atau kata sandi salah.'
+            ]);
     }
 
-    // Cek akun aktif
+    // Inactive account
     if (!$user->is_active) {
         return back()
-            ->withInput($request->only('identifier', 'remember'))
-            ->withErrors(['identifier' => 'Akun Anda tidak aktif. Hubungi administrator.']);
+            ->withInput(
+                $request->only('identifier', 'remember')
+            )
+            ->withErrors([
+                'identifier' =>
+                    'Akun Anda tidak aktif.'
+            ]);
     }
 
-    Auth::login($user, $request->boolean('remember'));
+    // Email not verified
+    if (!$user->hasVerifiedEmail()) {
+
+        return back()
+            ->withInput(
+                $request->only('identifier')
+            )
+            ->with(
+                'warning',
+                'Email Anda belum terverifikasi. Silakan cek email Anda.'
+            );
+    }
+
+    Auth::login(
+        $user,
+        $request->boolean('remember')
+    );
+
     $request->session()->regenerate();
 
-    // Redirect berdasarkan role
     return match ($user->role) {
-        'asesor', 'assessor' => redirect('/dashboard-asesor'),
-        'manager'  => redirect('/dashboard-manager'),
-        default    => redirect('/dashboard'),
-    };
-})->name('login.post');
 
-// --- REGISTER ---
+        'asesor', 'assessor'
+            => redirect('/dashboard-asesor')
+                ->with('success', 'Login berhasil.'),
+
+        'manager'
+            => redirect('/dashboard-manager')
+                ->with('success', 'Login berhasil.'),
+        
+        'superadmin'
+            => redirect('/dashboard-superadmin')
+                ->with('success', 'Login berhasil.'),
+
+        default
+            => redirect('/dashboard')
+                ->with('success', 'Login berhasil.'),
+    };
+
+})->middleware('throttle:5,1')
+  ->name('login.post');
+
+
+// REGISTER PAGE
 Route::get('/register', function () {
     return view('auth.register');
-})->name('register');
+})->middleware('guest')->name('register');
 
+
+// REGISTER PROCESS
 Route::post('/register', function (Request $request) {
+
     $request->validate([
         'name'     => 'required|string|max:255',
         'email'    => 'required|email|unique:users,email',
@@ -154,12 +153,13 @@ Route::post('/register', function (Request $request) {
     ]);
 
     $user = DB::transaction(function () use ($request) {
+
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'applicant',
-            'is_active'=> true,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role'      => 'applicant',
+            'is_active' => true,
         ]);
 
         Applicant::create([
@@ -179,137 +179,229 @@ Route::post('/register', function (Request $request) {
         report($e);
     }
 
-    // Langsung login setelah register
-    Auth::login($user);
-    $request->session()->regenerate();
+    // DO NOT AUTO LOGIN
+    return redirect('/login')
+        ->with(
+            'success',
+            'Registrasi berhasil. Silakan cek email anda untuk melakukan verifikasi.'
+        );
 
-    return redirect('/dashboard')
-        ->with('success', 'Akun berhasil dibuat! Silakan verifikasi email Anda.');
-})->name('register.post');
+})->middleware('throttle:3,1')
+  ->name('register.post');
 
-// --- FORGOT PASSWORD ---
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->middleware('guest')->name('password.request');
 
-Route::post('/forgot-password', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-    ]);
-
-    $status = Password::sendResetLink($request->only('email'));
-
-    return $status === Password::RESET_LINK_SENT
-        ? back()->with('status', __($status))
-        : back()->withErrors(['email' => __($status)]);
-})->middleware('guest')->name('password.email');
-
-Route::get('/password/request', function () {
-    return redirect()->route('password.request');
-});
-
-Route::post('/password/email', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-    ]);
-
-    $status = Password::sendResetLink($request->only('email'));
-
-    return $status === Password::RESET_LINK_SENT
-        ? back()->with('status', __($status))
-        : back()->withErrors(['email' => __($status)]);
-});
-
-Route::get('/reset-password/{token}', function (string $token) {
-    return view('auth.reset-password', ['token' => $token]);
-})->middleware('guest')->name('password.reset');
-
-Route::post('/reset-password', function (Request $request) {
-    $request->validate([
-        'token' => 'required',
-        'email' => 'required|email',
-        'password' => 'required|min:6|confirmed',
-    ]);
-
-    $status = Password::reset(
-        $request->only('email', 'password', 'password_confirmation', 'token'),
-        function (User $user, string $password) {
-            $user->forceFill([
-                'password' => Hash::make($password),
-            ])->save();
-        }
-    );
-
-    return $status === Password::PASSWORD_RESET
-        ? redirect()->route('login')->with('status', __($status))
-        : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
-})->middleware('guest')->name('password.store');
-
+// VERIFY EMAIL PAGE
 Route::get('/verify-email', function () {
     return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+})->middleware('auth')
+  ->name('verification.notice');
 
-Route::get('/email/verify/{id}/{hash}', function (Request $request, string $id, string $hash) {
+
+// VERIFY EMAIL PROCESS
+Route::get('/email/verify/{id}/{hash}', function (
+    Request $request,
+    string $id,
+    string $hash
+) {
+
     $user = User::findOrFail($id);
 
-    abort_unless(hash_equals($hash, sha1($user->getEmailForVerification())), 403);
+    abort_unless(
+        hash_equals(
+            $hash,
+            sha1($user->getEmailForVerification())
+        ),
+        403
+    );
 
     if (!$user->hasVerifiedEmail()) {
+
         $user->markEmailAsVerified();
+
         event(new Verified($user));
     }
 
-    return redirect('/dashboard?verified=1');
-})->middleware(['auth', 'signed'])->name('verification.verify');
+    return redirect('/login')
+        ->with(
+            'success',
+            'Email berhasil diverifikasi.'
+        );
 
-Route::post('/email/verification-notification', function (Request $request) {
+})->middleware(['signed'])
+  ->name('verification.verify');
+
+
+// RESEND VERIFICATION EMAIL
+Route::post('/email/verification-notification', function (
+    Request $request
+) {
+
     if ($request->user()->hasVerifiedEmail()) {
         return redirect('/dashboard');
     }
 
-    $request->user()->sendEmailVerificationNotification();
+    $request->user()
+        ->sendEmailVerificationNotification();
 
-    return back()->with('status', 'verification-link-sent');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    return back()
+        ->with(
+            'status',
+            'verification-link-sent'
+        );
 
-Route::get('/confirm-password', function () {
-    return view('auth.confirm-password');
-})->middleware('auth')->name('password.confirm');
+})->middleware([
+    'auth',
+    'throttle:6,1'
+])->name('verification.send');
 
-Route::post('/confirm-password', function (Request $request) {
-    $request->validate([
-        'password' => 'required|current_password',
-    ]);
+// FORGOT PASSWORD
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')
+  ->name('password.request');
 
-    $request->session()->put('auth.password_confirmed_at', time());
-
-    return redirect()->intended('/dashboard');
-})->middleware('auth')->name('password.confirm.store');
-
-Route::put('/password', function (Request $request) {
-    $request->validateWithBag('updatePassword', [
-        'current_password' => ['required', 'current_password'],
-        'password' => ['required', 'confirmed', 'min:6'],
-    ]);
-
-    $request->user()->update([
-        'password' => Hash::make($request->password),
-    ]);
-
-    return back()->with('status', 'password-updated');
-})->middleware('auth')->name('password.update');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// --- LOGOUT ---
+// LOGOUT
 Route::post('/logout', function (Request $request) {
+
     Auth::logout();
+
     $request->session()->invalidate();
+
     $request->session()->regenerateToken();
 
-    return redirect('/');
-})->name('logout');
+    return redirect('/login')
+        ->with(
+            'success',
+            'Logout berhasil.'
+        );
+
+})->middleware('auth')
+  ->name('logout');
+
+//APPLICANT ROUTES
+
+Route::middleware([
+    'auth',
+    'verified',
+    'role:applicant'
+])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('applicant.dashboard');
+    })->name('dashboard');
+
+    Route::get('/applicant/status', function () {
+        return view('applicant.status');
+    })->name('applicant.status');
+
+    Route::get('/applicant/profile', function () {
+        return view('applicant.profile');
+    })->name('applicant.profile');
+
+    Route::get('/applicant/program', function () {
+        return view('applicant.program');
+    })->name('applicant.program');
+
+    Route::get('/applicant/documents', function () {
+        return view('applicant.documents');
+    })->name('applicant.documents');
+
+    Route::get('/applicant/outcomes', function () {
+        return view('applicant.outcomes');
+    })->name('applicant.outcomes');
+});
+
+//ASESOR ROUTES
+
+Route::middleware([
+    'auth',
+    'verified',
+    'role:asesor'
+])->group(function () {
+
+    Route::get('/dashboard-asesor', function () {
+        return view('assessor.dashboard');
+    })->name('dashboard.assessor');
+
+    Route::get('/asesor/antrean', function () {
+        return view('assessor.queue');
+    })->name('assessor.queue');
+
+    Route::get('/asesor/riwayat', function () {
+        return view('assessor.history');
+    })->name('assessor.history');
+});
+
+//MANAGER ROUTES
+
+Route::middleware([
+    'auth',
+    'verified',
+    'role:manager'
+])->group(function () {
+
+    Route::get('/dashboard-manager', function () {
+        return view('manager.dashboard');
+    })->name('dashboard.manager');
+
+    Route::get('/manager/pengajuan', function () {
+        return view('manager.applications');
+    })->name('manager.applications');
+
+    Route::get('/manager/assign', function () {
+        return view('manager.assignment');
+    })->name('manager.assignment');
+
+    Route::get('/manager/asesor', function () {
+        return view('manager.asesors');
+    })->name('manager.asesors');
+
+    Route::get('/manager/laporan', function () {
+        return view('manager.reports');
+    })->name('manager.reports');
+});
+
+//SUPERADMIN ROUTES
+
+Route::middleware([
+    'auth',
+    'verified',
+    'role:superadmin'
+])->group(function () {
+
+    Route::get('/dashboard-superadmin', function () {
+        return view('superadmin.dashboard');
+    })->name('dashboard.superadmin');
+
+    Route::get('/superadmin/staff', function () {
+        return view('superadmin.staff');
+    })->name('superadmin.staff');
+
+    Route::get('/superadmin/managers', function () {
+        return view('superadmin.managers');
+    })->name('superadmin.managers');
+
+    Route::get('/superadmin/asesors', function () {
+        return view('superadmin.asesors');
+    })->name('superadmin.asesors');
+
+});
+
+//PROFILE ROUTES
+Route::middleware('auth')->group(function () {
+
+    Route::get('/profile', [
+        ProfileController::class,
+        'edit'
+    ])->name('profile.edit');
+
+    Route::patch('/profile', [
+        ProfileController::class,
+        'update'
+    ])->name('profile.update');
+
+    Route::delete('/profile', [
+        ProfileController::class,
+        'destroy'
+    ])->name('profile.destroy');
+});
