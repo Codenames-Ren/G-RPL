@@ -489,4 +489,39 @@
     </div>
 </main>
 
+{{-- SweetAlert2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Registrasi Berhasil',
+        text: '{{ session('success') }}',
+        confirmButtonColor: '#1565C0',
+        confirmButtonText: 'OK'
+    }).then(() => {
+        window.location.href = "{{ route('login') }}";
+    });
+</script>
+@endif
+
+@if ($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Registrasi Gagal',
+        html: `
+            <ul style="text-align:left;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        `,
+        confirmButtonColor: '#D32F2F',
+        confirmButtonText: 'Mengerti'
+    });
+</script>
+@endif
+
 @endsection
