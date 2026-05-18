@@ -304,4 +304,52 @@
     </div>
 </main>
 
+{{-- SweetAlert2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{-- Login Success --}}
+@if (session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: '{{ session('success') }}',
+        confirmButtonColor: '#1565C0',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
+{{-- Warning --}}
+@if (session('warning'))
+<script>
+    Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian',
+        text: '{{ session('warning') }}',
+        confirmButtonColor: '#F59E0B',
+        confirmButtonText: 'Mengerti'
+    });
+</script>
+@endif
+
+{{-- Validation / Login Error --}}
+@if ($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Login Gagal',
+        html: `
+            <ul style="text-align:left;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        `,
+        confirmButtonColor: '#D32F2F',
+        confirmButtonText: 'Coba Lagi'
+    });
+</script>
+@endif
+
 @endsection
