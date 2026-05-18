@@ -109,7 +109,7 @@ window.addEventListener('load', () => {
     function documentRows(documents) {
         if (!documents?.length) return '<p class="text-xs text-[#5A6478]">Belum ada dokumen.</p>';
         return documents.map((doc) => `
-            <a href="/storage/${esc(doc.file_path)}" target="_blank" class="flex items-center justify-between gap-4 border border-gray-100 rounded-lg p-3 hover:border-[#1565C0]/40">
+            <a href="/storage/${esc(doc.file_path)}?v=${esc(doc.updated_at || Date.now())}" target="_blank" class="flex items-center justify-between gap-4 border border-gray-100 rounded-lg p-3 hover:border-[#1565C0]/40">
                 <div>
                     <p class="text-xs font-bold text-[#1A1A2E]">${esc(doc.document_type || doc.type)}</p>
                     <p class="text-[10px] text-[#5A6478] mt-0.5">${esc(doc.file_name || doc.file_path)}</p>

@@ -109,9 +109,10 @@ window.addEventListener('load', () => {
                 <td class="px-6 py-4 text-xs text-[#5A6478]">${esc(app.latest_assignment?.asesor?.nama)}</td>
                 <td class="px-6 py-4 text-center">
                     <div class="inline-flex items-center justify-center gap-2">
+                        <button type="button" data-open-detail="${esc(app.id)}" class="px-3 py-1.5 border border-[#1565C0]/25 text-[#1565C0] text-[10px] font-bold rounded-lg hover:bg-[#E3F0FF] transition-colors">Detail</button>
                         ${app.status === 'submitted'
                             ? `<a href="{{ route('manager.assignment') }}" class="px-3 py-1.5 bg-[#1565C0] text-white text-[10px] font-bold rounded-lg hover:bg-[#0D47A1] transition-colors">Assign</a>`
-                            : `<button type="button" data-open-detail="${esc(app.id)}" class="px-3 py-1.5 bg-[#1565C0] text-white text-[10px] font-bold rounded-lg hover:bg-[#0D47A1] transition-colors">Detail</button>`}
+                            : ''}
                         ${app.status === 'submitted' ? `<button type="button" data-reject-application="${esc(app.id)}" class="px-3 py-1.5 bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold rounded-lg hover:bg-red-100 transition-colors">Reject</button>` : ''}
                     </div>
                 </td>
@@ -122,7 +123,7 @@ window.addEventListener('load', () => {
     const renderDocuments = (documents) => {
         if (!documents?.length) return '<p class="text-xs text-[#5A6478]">Belum ada dokumen.</p>';
         return documents.map((doc) => `
-            <a href="/storage/${esc(doc.file_path)}" target="_blank" class="flex items-center justify-between gap-4 border border-gray-100 rounded-lg p-3 hover:border-[#1565C0]/40">
+            <a href="/storage/${esc(doc.file_path)}?v=${esc(doc.updated_at || Date.now())}" target="_blank" class="flex items-center justify-between gap-4 border border-gray-100 rounded-lg p-3 hover:border-[#1565C0]/40">
                 <div>
                     <p class="text-xs font-bold text-[#1A1A2E]">${esc(doc.document_type || doc.type)}</p>
                     <p class="text-[10px] text-[#5A6478] mt-0.5">${esc(doc.file_name || doc.file_path)}</p>

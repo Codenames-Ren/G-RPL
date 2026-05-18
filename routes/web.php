@@ -278,6 +278,26 @@ Route::post('/logout', function (Request $request) {
 })->middleware('auth')
   ->name('logout');
 
+// ROLE-AWARE DASHBOARD ENTRY
+Route::get('/dashboard', function (Request $request) {
+    return match ($request->user()->role) {
+        'asesor', 'assessor'
+            => redirect()->route('dashboard.assessor'),
+
+        'manager'
+            => redirect()->route('dashboard.manager'),
+
+        'superadmin'
+            => redirect()->route('dashboard.superadmin'),
+
+        default
+            => view('applicant.dashboard'),
+    };
+})->middleware([
+    'auth',
+    'verified',
+])->name('dashboard');
+
 //APPLICANT ROUTES
 
 Route::middleware([
@@ -285,10 +305,6 @@ Route::middleware([
     'verified',
     'role:applicant'
 ])->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('applicant.dashboard');
-    })->name('dashboard');
 
     Route::get('/applicant/status', function () {
         return view('applicant.status');

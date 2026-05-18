@@ -61,19 +61,73 @@ window.addEventListener('load', () => {
     const appSelect = document.getElementById('applicationSelect');
     const list = document.getElementById('experiencesList');
     const alertBox = document.getElementById('outcomeAlert');
+    const editableStatuses = ['draft', 'rejected'];
+    let applications = [];
+    const esc = (value) => String(value ?? '-').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
     const showAlert = (message, ok = true) => {
         alertBox.textContent = message;
         alertBox.className = `mb-6 p-4 rounded-xl text-sm font-bold ${ok ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`;
     };
+    const clearAlert = () => {
+        alertBox.textContent = '';
+        alertBox.className = 'hidden mb-6 p-4 rounded-xl text-sm font-bold';
+    };
+    const selectedApplication = () => applications.find((app) => String(app.id) === String(appSelect.value));
+
     async function loadApplications() {
         const { data } = await axios.get('/api/applications');
-        appSelect.innerHTML = data.length ? data.map((app) => `<option value="${app.id}">${app.prodi?.nama_prodi || 'Application'} - ${app.status}</option>`).join('') : '<option value="">Belum ada application</option>';
-        if (data.length) loadExperiences();
+        applications = data.filter((app) => editableStatuses.includes(app.status));
+        appSelect.innerHTML = applications.length
+            ? applications.map((app) => `<option value="${esc(app.id)}">${esc(app.prodi?.nama_prodi || 'Application')} - ${esc(app.status)}</option>`).join('')
+            : '<option value="">Tidak ada application draft/rejected</option>';
+
+        if (!applications.length) {
+            list.innerHTML = '<div class="p-8 text-center text-sm text-[#5A6478]">Learning experience hanya bisa diubah saat application berstatus draft atau rejected.</div>';
+            document.getElementById('experienceForm').querySelectorAll('input, textarea, select, button').forEach((field) => field.disabled = true);
+            document.getElementById('submitButton').disabled = true;
+            document.getElementById('submitButton').className = 'w-full mt-6 px-5 py-2.5 bg-gray-200 text-gray-400 text-sm font-bold rounded-lg cursor-not-allowed';
+            return;
+        }
+
+        document.getElementById('experienceForm').querySelectorAll('input, textarea, select, button').forEach((field) => field.disabled = false);
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('submitButton').className = 'w-full mt-6 px-5 py-2.5 bg-[#1565C0] text-white text-sm font-bold rounded-lg';
+        const rejected = applications.find((app) => app.status === 'rejected');
+        if (rejected) appSelect.value = rejected.id;
+        loadExperiences();
     }
+
     async function loadExperiences() {
         if (!appSelect.value) return;
+        const app = selectedApplication();
+        if (app?.status === 'rejected') {
+            showAlert(`Pengajuan direject. Alasan: ${app.rejection_note || 'Tidak ada catatan.'} Silakan perbaiki learning experience lalu submit ulang.`, false);
+        } else {
+            clearAlert();
+        }
         const { data } = await axios.get(`/api/applications/${appSelect.value}/learning-experiences`);
-        list.innerHTML = data.length ? data.map((item) => `<div class="p-6"><div class="flex items-start justify-between gap-4"><div><p class="text-sm font-bold text-[#1A1A2E]">${item.title}</p><span class="inline-flex mt-2 px-2 py-1 bg-blue-50 text-[#1565C0] text-[10px] font-bold rounded-full">${item.type}</span></div></div><p class="mt-3 text-xs text-[#5A6478] leading-relaxed">${item.description || 'Tidak ada deskripsi.'}</p></div>`).join('') : '<div class="p-8 text-center text-sm text-[#5A6478]">Belum ada learning experience.</div>';
+        list.innerHTML = data.length ? data.map((item) => `
+            <form data-experience-id="${esc(item.id)}" class="p-6 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold text-[#1A1A2E]">${esc(item.title)}</p>
+                        <span class="inline-flex mt-2 px-2 py-1 bg-blue-50 text-[#1565C0] text-[10px] font-bold rounded-full">${esc(item.type)}</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-[#5A6478]">PUT /api/learning-experiences/${esc(item.id).slice(0, 8)}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input name="title" required value="${esc(item.title)}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                    <select name="type" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                        <option value="experience" ${item.type === 'experience' ? 'selected' : ''}>Experience</option>
+                        <option value="course" ${item.type === 'course' ? 'selected' : ''}>Course</option>
+                    </select>
+                </div>
+                <textarea name="description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">${esc(item.description || '')}</textarea>
+                <div class="flex justify-end">
+                    <button type="submit" class="px-4 py-2 bg-[#1565C0] text-white text-xs font-bold rounded-lg">Simpan Perubahan</button>
+                </div>
+            </form>
+        `).join('') : '<div class="p-8 text-center text-sm text-[#5A6478]">Belum ada learning experience.</div>';
     }
     document.getElementById('experienceForm').addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -89,7 +143,24 @@ window.addEventListener('load', () => {
             showAlert(error.response?.data?.message || 'Gagal menambah experience.', false);
         }
     });
+    list.addEventListener('submit', async (event) => {
+        const editForm = event.target.closest('[data-experience-id]');
+        if (!editForm) return;
+        event.preventDefault();
+        try {
+            await axios.put(`/api/learning-experiences/${editForm.dataset.experienceId}`, {
+                title: editForm.querySelector('[name="title"]').value,
+                type: editForm.querySelector('[name="type"]').value,
+                description: editForm.querySelector('[name="description"]').value,
+            });
+            showAlert('Learning experience berhasil diupdate.');
+            loadExperiences();
+        } catch (error) {
+            showAlert(error.response?.data?.message || 'Gagal update experience.', false);
+        }
+    });
     document.getElementById('submitButton').addEventListener('click', async () => {
+        if (!appSelect.value) return;
         try {
             await axios.patch(`/api/applications/${appSelect.value}/submit`);
             showAlert('Application submitted successfully.');

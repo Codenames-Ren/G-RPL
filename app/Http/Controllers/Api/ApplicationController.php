@@ -38,7 +38,9 @@ class ApplicationController extends Controller
     {
         $applications = Application::with([
             'prodi',
-            'konsentrasi'
+            'konsentrasi',
+            'documents',
+            'learningExperiences'
         ])
         ->where('applicant_id', $request->user()->applicant->id)
         ->latest()
