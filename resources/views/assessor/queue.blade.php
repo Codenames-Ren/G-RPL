@@ -211,6 +211,17 @@ window.addEventListener('load', () => {
         statusSelect.addEventListener('change', () => {
             approvedFields.classList.toggle('hidden', statusSelect.value === 'rejected');
         });
+        modalBody.querySelectorAll('.course-select').forEach((select) => {
+            const row = select.closest('.assessment-row');
+            const toggleNewCourseInputs = () => {
+                row.querySelectorAll('.new-code, .new-name, .new-sks').forEach((input) => {
+                    input.disabled = Boolean(select.value);
+                    input.classList.toggle('bg-gray-100', Boolean(select.value));
+                });
+            };
+            select.addEventListener('change', toggleNewCourseInputs);
+            toggleNewCourseInputs();
+        });
     }
 
     async function openAssessment(id) {
@@ -241,6 +252,27 @@ window.addEventListener('load', () => {
         };
 
         if (status === 'approved') {
+            const rows = [...document.querySelectorAll('.assessment-row')];
+            const invalidRow = rows.find((row) => {
+                const courseId = row.querySelector('.course-select').value;
+                const sksDiakui = Number(row.querySelector('.sks-diakui').value || 0);
+                const nilaiKonversi = Number(row.querySelector('.nilai-konversi').value || 0);
+                const hasNewCourse = row.querySelector('.new-code').value.trim()
+                    && row.querySelector('.new-name').value.trim()
+                    && Number(row.querySelector('.new-sks').value || 0) > 0;
+
+                return !row.dataset.learningExperienceId
+                    || sksDiakui < 0
+                    || nilaiKonversi < 0
+                    || nilaiKonversi > 100
+                    || (!courseId && !hasNewCourse);
+            });
+
+            if (invalidRow) {
+                showAlert('Lengkapi course existing atau data course baru, SKS, dan nilai konversi sebelum approve.', false);
+                return;
+            }
+
             payload.assessment_details = [...document.querySelectorAll('.assessment-row')].map((row) => {
                 const detail = {
                     learning_experience_id: row.dataset.learningExperienceId,

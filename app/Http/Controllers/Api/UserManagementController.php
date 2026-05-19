@@ -63,6 +63,8 @@ class UserManagementController extends Controller
             ]);
         }
 
+        $user->load(['asesor.prodis', 'rplManager']);
+
         return response()->json([
             'message' => 'User created successfully',
             'user' => $user
@@ -71,7 +73,8 @@ class UserManagementController extends Controller
 
     public function getUsers()
     {
-        $users = User::where('role', '!=', 'superadmin')
+        $users = User::with(['asesor.prodis', 'rplManager'])
+        ->where('role', '!=', 'superadmin')
         ->latest()
         ->get();
 

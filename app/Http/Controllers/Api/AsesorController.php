@@ -110,6 +110,12 @@ class AsesorController extends Controller
             'assessment_details.*.sks_diakui' => 'required_if:status,approved|integer|min:0',
 
             'assessment_details.*.nilai_konversi' => 'required_if:status,approved|integer|min:0|max:100',
+
+            'assessment_details.*.course_id' => 'nullable|exists:courses,id',
+            'assessment_details.*.new_course' => 'nullable|array',
+            'assessment_details.*.new_course.kode_mk' => 'nullable|string',
+            'assessment_details.*.new_course.nama_matkul' => 'nullable|string',
+            'assessment_details.*.new_course.sks' => 'nullable|integer|min:1',
         ]);
 
         $asesor = $request->user()->asesor;
@@ -146,6 +152,48 @@ class AsesorController extends Controller
             ], 403);
         }
 
+        if ($request->status === 'approved') {
+            $errors = [];
+
+            foreach ($request->assessment_details as $index => $detail) {
+                if (!empty($detail['course_id'])) {
+                    $courseExists = Course::where('id', $detail['course_id'])
+                        ->where('prodi_id', $application->prodi_id)
+                        ->where(function ($query) use ($application) {
+                            $query->where('konsentrasi_id', $application->konsentrasi_id)
+                                ->orWhereNull('konsentrasi_id');
+                        })
+                        ->exists();
+
+                    if (!$courseExists) {
+                        $errors["assessment_details.$index.course_id"] = [
+                            'Course tidak sesuai dengan prodi application.'
+                        ];
+                    }
+
+                    continue;
+                }
+
+                $newCourse = $detail['new_course'] ?? [];
+                if (
+                    blank($newCourse['kode_mk'] ?? null) ||
+                    blank($newCourse['nama_matkul'] ?? null) ||
+                    empty($newCourse['sks'])
+                ) {
+                    $errors["assessment_details.$index.new_course"] = [
+                        'Data course baru wajib diisi jika tidak memilih course existing.'
+                    ];
+                }
+            }
+
+            if ($errors) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $errors
+                ], 422);
+            }
+        }
+
         DB::beginTransaction();
 
         try {
@@ -164,22 +212,20 @@ class AsesorController extends Controller
                 foreach ($request->assessment_details as $detail) {
 
                     // use existing course
-                    if (isset($detail['course_id'])) {
+                    if (!empty($detail['course_id'])) {
 
-                        $course = Course::find($detail['course_id']);
-
-                        if (!$course) {
-                            throw new \Exception('Course not found');
-                        }
+                        $course = Course::where('id', $detail['course_id'])
+                            ->where('prodi_id', $application->prodi_id)
+                            ->where(function ($query) use ($application) {
+                                $query->where('konsentrasi_id', $application->konsentrasi_id)
+                                    ->orWhereNull('konsentrasi_id');
+                            })
+                            ->first();
 
                     } else {
 
                         // create new course inline
-                        $newCourse = $detail['new_course'] ?? null;
-
-                        if (!$newCourse) {
-                            throw new \Exception('Course data required');
-                        }
+                        $newCourse = $detail['new_course'];
 
                         $course = Course::create([
                             'prodi_id' => $application->prodi_id,

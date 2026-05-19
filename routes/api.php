@@ -28,6 +28,8 @@ Route::prefix('auth')->group(function () {
 
 });
 
+Route::middleware('auth:sanctum')->get('/prodis', fn () => Prodi::with('konsentrasis')->orderBy('nama_prodi')->get());
+
 // Auth Verification Email
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 
@@ -72,8 +74,7 @@ Route::middleware([
     'auth:sanctum',
     'role:applicant'
 ])->group(function () {
-    Route::get('/prodis', fn () => Prodi::with('konsentrasis')->orderBy('nama_prodi')->get());
-    
+
     //Applications Route
     Route::post('/applications', [ApplicationController::class, 'createApplication'])
         ->middleware('throttle:10,1');
@@ -93,12 +94,12 @@ Route::middleware([
 
     // Route Documents
     Route::post('/applications/{applicationId}/documents', [ApplicationDocumentController::class, 'uploadDocument'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:12,1');
     
     Route::get('/applications/{applicationId}/documents', [ApplicationDocumentController::class, 'getDocuments']);
     
     Route::put('/documents/{id}', [ApplicationDocumentController::class, 'updateDocument'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:12,1');
     
     // Learning Experiences
     Route::post('/applications/{applicationId}/learning-experiences', [LearningExperienceController::class, 'createLearningExperience'])
